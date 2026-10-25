@@ -499,8 +499,6 @@ function renderShop(){
 }
 function renderAll(){renderProfile();renderHome();renderMeals();renderWalks();renderPlans();renderShop();
   $("#editProfileBtn").hidden=!S.db||!S.canWrite;$("#editInfoBtn").hidden=!S.db||!S.canWrite;
-  document.querySelectorAll("[data-open]").forEach(b=>b.disabled=!S.db||!S.canWrite);
-  document.querySelectorAll("#addItemForm button,#addItemForm input").forEach(b=>b.disabled=!S.db||!S.canWrite);
 }
 
 /* ---------- delete (tap twice) ---------- */
@@ -515,18 +513,21 @@ document.addEventListener("click",async e=>{
 });
 
 /* ---------- writes ---------- */
-function fail(err){if(err&&err.code==="invalid_argument"){S.canWrite=false;renderAll();toast("You can view Bunny's page but not log to it. Open the link from Bunny's tag to get access.")}else toast("Couldn't save. Check your connection and try again.")}
+function fail(err){console.warn(err);if(err&&err.code==="permission-denied"){forgetKey();toast("That house code didn't work. Tap Bunny's tag or enter the code again.");openSheet("unlock")}else toast("Couldn't save. Check your connection and try again.")}
+function forgetKey(){try{localStorage.removeItem("bunny.key")}catch(e){}}
+function needKey(){if(S.db)return false;openSheet("unlock");return true}
 async function saveFood(patch,quiet){
+  if(needKey())return;
   const next={...S.food,...patch};if(!quiet){next.updatedBy=me||"Someone";next.updatedAt=Date.now()}
   S.food=next;renderAll();
   try{await S.db.doc("meta/food").set(next)}catch(err){fail(err)}
 }
 async function addItem(name){
-  name=(name||"").trim();if(!name||!S.db)return;
+  name=(name||"").trim();if(!name||needKey())return;
   if(S.shopping.some(i=>!i.done&&i.item.toLowerCase()===name.toLowerCase())){toast(name+" is already on the list");return}
   try{await S.db.collection("shopping").add({item:name,by:me||"Someone",done:false,at:Date.now()});toast("Added "+name)}catch(err){fail(err)}
 }
-async function toggleItem(it,done){try{await S.db.collection("shopping").doc(it.id).set({...it,id:undefined,done,boughtBy:done?(me||"Someone"):null,at:it.at})}catch(err){fail(err)}}
+async function toggleItem(it,done){if(needKey())return;try{await S.db.collection("shopping").doc(it.id).set({...it,id:undefined,done,boughtBy:done?(me||"Someone"):null,at:it.at})}catch(err){fail(err)}}
 $("#addItemForm").onsubmit=e=>{e.preventDefault();addItem($("#newItem").value);$("#newItem").value=""};
 $("#clearDone").onclick=async()=>{for(const i of S.shopping.filter(i=>i.done)){try{await S.db.collection("shopping").doc(i.id).delete()}catch(err){fail(err);break}}};
 
@@ -534,8 +535,9 @@ $("#clearDone").onclick=async()=>{for(const i of S.shopping.filter(i=>i.done)){t
 function closeSheet(){$("#sheetRoot").innerHTML=""}
 function whoSelect(id){return `<div class="field"><label for="${id}">Who</label><select class="input" id="${id}">${PEOPLE.map(p=>`<option ${p===me?"selected":""}>${p}</option>`).join("")}</select></div>`}
 function openSheet(kind){
-  if(!S.db){toast("Tap Bunny's NFC tag to open the logging link");return}
+  if(kind!=="unlock"&&!S.db){kind="unlock"}
   let html="";
+  if(kind==="unlock")html=`<h2>Enter the house code</h2><p class="muted" style="margin:0">To log meals and walks, open this page by tapping Bunny's NFC tag. Or type the house code from the roommates' link (the part after <b>?k=</b>). This phone will remember it.</p><div class="field"><label for="uKey">House code</label><input class="input" id="uKey" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="bunny-..."></div><button class="btn primary" id="sSave">Unlock</button>`;
   if(kind==="feed")html=`<h2>Log a meal</h2><div class="grid2">${whoSelect("fWho")}<div class="field"><label for="fCups">Cups</label><input class="input num" id="fCups" type="number" min="0" step="0.25" inputmode="decimal" value="${S.profile.cupsPerMeal||1}"></div></div><div class="field"><label for="fAt">When</label><input class="input" id="fAt" type="datetime-local" value="${toLocalInput(Date.now())}"></div><div class="field"><label for="fNote">Note (optional)</label><input class="input" id="fNote" maxlength="140" placeholder="e.g. Added a little wet food"></div>${mealsToday().length>=(+S.profile.mealsPerDay||2)?`<div class="banner warn">She already has ${mealsToday().length} meal${mealsToday().length===1?"":"s"} logged today. Last by ${esc(S.feedings[0].who)} at ${fmtTime(S.feedings[0].at)}.</div>`:""}<button class="btn primary" id="sSave">Save meal</button>`;
   if(kind==="walk")html=`<h2>Log a walk</h2><div class="toggle"><button type="button" id="tPee" aria-pressed="true"><span>Peed</span><small>tap to toggle</small></button><button type="button" id="tPoop" aria-pressed="false"><span>Pooped</span><small>tap to toggle</small></button></div><div class="grid2">${whoSelect("wWho")}<div class="field"><label for="wMins">Minutes (optional)</label><input class="input num" id="wMins" type="number" min="0" step="5" inputmode="numeric" placeholder="15"></div></div><div class="field"><label for="wAt">When</label><input class="input" id="wAt" type="datetime-local" value="${toLocalInput(Date.now())}"></div><div class="field"><label for="wNote">Note (optional)</label><input class="input" id="wNote" maxlength="140" placeholder="e.g. Soft poop, keep an eye on it"></div><button class="btn dark" id="sSave">Save walk</button>`;
   if(kind==="book"){const t=Date.now();html=`<h2>Reserve Bunny</h2><div class="field"><label for="bLabel">What for</label><select class="input" id="bLabel">${["Thanksgiving","Winter break","Spring break","Summer","Long weekend","Weekend","Other"].map(x=>`<option>${x}</option>`).join("")}</select></div>${whoSelect("bWho")}<div class="grid2"><div class="field"><label for="bStart">From</label><input class="input" id="bStart" type="date" value="${isoDate(t)}"></div><div class="field"><label for="bEnd">To</label><input class="input" id="bEnd" type="date" value="${isoDate(t+2*DAY)}"></div></div><div class="field"><label for="bNote">Note (optional)</label><input class="input" id="bNote" maxlength="160" placeholder="e.g. Taking her to my parents' in Jersey"></div><div id="bWarn"></div><button class="btn primary" id="sSave">Reserve these dates</button>`}
@@ -548,6 +550,7 @@ function openSheet(kind){
   $("#sSave").onclick=async()=>{
     const btn=$("#sSave");btn.disabled=true;
     try{
+      if(kind==="unlock"){const k=$("#uKey").value.trim();if(!k){btn.disabled=false;return}try{localStorage.setItem("bunny.key",k)}catch(e){}location.replace(location.pathname+"?k="+encodeURIComponent(k));return}
       if(kind==="feed"){const who=$("#fWho").value,cups=Math.max(0,+$("#fCups").value||0),at=new Date($("#fAt").value).getTime()||Date.now();
         setMe(who);await S.db.collection("feedings").add({who,cups,at,note:$("#fNote").value.trim()});
         if(S.food.bagCups)await saveFood({cupsLeft:Math.max(0,(+S.food.cupsLeft)-cups)},true);
@@ -574,7 +577,7 @@ function listen(col,q){
     S[col]=snap.docs.map(d=>({id:d.id,...d.data()}));
     if(!snap.metadata.fromCache)S.loaded[col]=true;
     renderAll();
-  },err=>{console.warn(col,err)});
+  },err=>{console.warn(col,err);if(err&&err.code==="permission-denied"&&!listen.denied){listen.denied=true;forgetKey();const c=$("#connBanner");c.hidden=false;c.innerHTML=`<span>That house code didn't work, so Bunny's log can't load.</span><button class="btn small primary" type="button" data-open="unlock">Enter house code</button>`}});
 }
 async function boot(){
   renderWho();
@@ -586,14 +589,14 @@ async function boot(){
   const cfg=window.BUNNY_FIREBASE_CONFIG;
   if(!window.firebase||!cfg||!cfg.apiKey||cfg.apiKey.startsWith("PASTE")){conn.textContent="This page isn't connected to its database yet. Fill in config.js (see the README).";return}
   // The house key comes from the link on Bunny's tag (?k=...) and is remembered on this phone.
-  let key=new URLSearchParams(location.search).get("k");
+  let key=(new URLSearchParams(location.search).get("k")||"").trim();
   try{if(key)localStorage.setItem("bunny.key",key);else key=localStorage.getItem("bunny.key")}catch(e){}
-  if(!key){conn.textContent="Tap Bunny's NFC tag (or open the roommates' link) to see and log her meals, walks and plans.";return}
+  if(!key){conn.innerHTML=`<span>Tap Bunny's NFC tag (or open the roommates' link) to see and log her meals, walks and plans.</span><button class="btn small primary" type="button" data-open="unlock">Enter house code</button>`;return}
   if(location.search)history.replaceState(null,"",location.pathname+location.hash);
   firebase.initializeApp(cfg);
   const home=firebase.firestore().collection("homes").doc(key);
   const db={collection:c=>home.collection(c),doc:p=>{const [c,id]=p.split("/");return home.collection(c).doc(id)}};
-  S.db=db;conn.hidden=true;
+  S.db=db;conn.hidden=true;renderAll();
   db.doc("meta/profile").onSnapshot(s=>{S.profile={...DEFAULT_PROFILE,...(s.exists?s.data():{})};renderAll()},()=>{});
   db.doc("meta/food").onSnapshot(s=>{S.food={...DEFAULT_FOOD,...(s.exists?s.data():{})};renderAll()},()=>{});
   listen("feedings",db.collection("feedings").orderBy("at","desc").limit(150));
