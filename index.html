@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bunny's Tag</title>
+<meta name="description" content="Bunny (aka Orleans): meals, walks, holiday plans and supplies.">
+<meta name="theme-color" content="#e2408f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="images/icon-192.png">
+<link rel="apple-touch-icon" href="images/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bunny">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pacifico&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: phone-first app shell. Dog-tag hero card up top, live status, quick-log buttons; tabs pinned to the bottom like a native app. */
+:root{
+  --bg:#fde8f1;          /* blush */
+  --surface:#ffffff;
+  --surface-2:#fff3f8;
+  --ink:#3a1730;         /* deep plum */
+  --muted:#8a5c78;
+  --line:#f5cde0;
+  --accent:#e2408f;      /* hot pink */
+  --accent-ink:#ffffff;
+  --pink:#ffc6e0;
+  --dots:#f9cfe2;
+  --good:#1f8a5b; --good-bg:#dff3e8;
+  --warn:#b25e00; --warn-bg:#fff0d9;
+  --bad:#c0303a;  --bad-bg:#fde3e4;
+  --display:"Pacifico","Brush Script MT",cursive;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1f1119;--surface:#2b1823;--surface-2:#35202d;--ink:#ffe8f3;--muted:#c99ab3;--line:#4a2b3c;
+  --accent:#ff78b6;--accent-ink:#2a0a1a;--pink:#ffb3d6;--dots:#2c1622;
+  --good:#5fd39b;--good-bg:#173528;--warn:#ffb862;--warn-bg:#3a2a12;--bad:#ff7d85;--bad-bg:#3d1d21;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1f1119;--surface:#2b1823;--surface-2:#35202d;--ink:#ffe8f3;--muted:#c99ab3;--line:#4a2b3c;
+  --accent:#ff78b6;--accent-ink:#2a0a1a;--pink:#ffb3d6;--dots:#2c1622;
+  --good:#5fd39b;--good-bg:#173528;--warn:#ffb862;--warn-bg:#3a2a12;--bad:#ff7d85;--bad-bg:#3d1d21;color-scheme:dark}
+
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);background-image:radial-gradient(var(--dots) 1.6px,transparent 1.8px);background-size:22px 22px;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px calc(96px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{text-wrap:balance;margin:0}
+h2{font-family:var(--display);font-weight:400;font-size:1.7rem;color:var(--accent);line-height:1.3}
+h3{font-size:1rem;font-weight:800}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.card{background:var(--surface);border-radius:var(--r);padding:16px;border:1px solid var(--line)}
+.section{display:flex;flex-direction:column;gap:14px}
+.view[hidden]{display:none}
+
+/* hero tag */
+.tag{position:relative;background:var(--ink);color:var(--bg);border-radius:28px;box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 25%,transparent);overflow:hidden;display:grid;grid-template-columns:1fr;}
+.tag img{width:100%;aspect-ratio:720/998;object-fit:cover;display:block;max-width:100%}
+.tag .hole{position:absolute;top:14px;left:50%;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:var(--bg);box-shadow:inset 0 2px 4px rgba(0,0,0,.35)}
+.tag .plate{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px}
+.tag h1{font-family:var(--display);font-weight:400;font-size:3.1rem;line-height:1.1;color:var(--pink)}
+.tag .aka{font-weight:700;color:var(--pink);margin-top:-6px}
+.tag p{margin:0;color:color-mix(in srgb,var(--bg) 88%,transparent)}
+.tag .facts{display:flex;flex-wrap:wrap;gap:6px}
+.tag .facts span{font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:99px;background:color-mix(in srgb,var(--bg) 14%,transparent)}
+.edit-link{background:none;border:0;padding:0;color:var(--accent);font-weight:700;font-size:.85rem;text-decoration:underline;text-underline-offset:3px;align-self:flex-start}
+
+/* who am I */
+.who{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.who::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font-weight:700;font-size:.9rem}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* status */
+.status{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat .big{font-size:1.35rem;font-weight:800;line-height:1.15}
+.stat .sub{font-size:.85rem;color:var(--muted)}
+.stat.wide{grid-column:1/-1}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.plain{background:var(--surface-2);color:var(--muted)}
+.meter{height:10px;border-radius:99px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;background:var(--good);border-radius:99px;transition:width .4s}
+.meter.low i{background:var(--warn)}.meter.out i{background:var(--bad)}
+
+/* quick actions */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:0;border-radius:16px;padding:14px 16px;font-weight:800;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.dark{background:var(--ink);color:var(--bg)}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.btn.small{min-height:40px;padding:8px 14px;font-size:.9rem;border-radius:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg{width:22px;height:22px;flex:none}
+
+/* banners */
+.banner{border-radius:var(--r);padding:12px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-weight:600}
+.banner.warn{background:var(--warn-bg);color:var(--warn)}
+.banner.bad{background:var(--bad-bg);color:var(--bad)}
+.banner.info{background:var(--surface);border:1px dashed var(--line);color:var(--muted);font-weight:500}
+
+/* log lists */
+.day{display:flex;flex-direction:column;gap:6px}
+.day-h{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px}
+.entries{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.entry{display:grid;grid-template-columns:72px 1fr auto;gap:10px;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.entry:first-child{border-top:0}
+.entry .t{font-weight:800;font-variant-numeric:tabular-nums}
+.entry .w{min-width:0}
+.entry .w b{font-weight:700}
+.entry .w small{display:block;color:var(--muted);overflow-wrap:anywhere}
+.x{border:0;background:none;color:var(--muted);font-size:.8rem;font-weight:700;padding:6px 8px;border-radius:8px}
+.x.armed{background:var(--bad-bg);color:var(--bad)}
+.badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.empty{padding:22px 16px;text-align:center;color:var(--muted)}
+
+/* leaderboard */
+.board{display:flex;flex-direction:column;gap:8px}
+.board .r{display:grid;grid-template-columns:76px 1fr 28px;gap:10px;align-items:center;font-size:.9rem;font-weight:600}
+.board .bar{height:10px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.board .bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+
+/* forms */
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:.8rem;font-weight:700;color:var(--muted)}
+.input{width:100%;border:1.5px solid var(--line);background:var(--surface-2);border-radius:12px;padding:11px 12px;min-width:0}
+textarea.input{resize:vertical;min-height:70px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toggle{display:flex;gap:8px}
+.toggle button{flex:1;border:1.5px solid var(--line);background:var(--surface-2);border-radius:14px;padding:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:2px}
+.toggle button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--ink)}
+.toggle small{font-weight:600;color:var(--muted);font-size:.75rem}
+
+/* bookings */
+.booking{display:grid;grid-template-columns:62px 1fr auto;gap:12px;align-items:start;padding:14px;border-top:1px solid var(--line)}
+.booking:first-child{border-top:0}
+.cal{border-radius:12px;background:var(--ink);color:var(--bg);text-align:center;padding:6px 0 7px;line-height:1.05}
+.cal .m{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.cal .d{font-weight:800;font-size:1.5rem}
+.booking .w{min-width:0}
+
+/* shopping */
+.item{display:flex;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.item .w{flex:1;min-width:0}
+.item.done .w b{text-decoration:line-through;color:var(--muted)}
+.sugg{display:flex;flex-wrap:wrap;gap:6px}
+.sugg button{border:1px dashed var(--line);background:none;border-radius:99px;padding:5px 11px;font-size:.82rem;font-weight:700;color:var(--muted)}
+
+/* info */
+.kv{display:grid;grid-template-columns:minmax(90px,38%) 1fr;gap:10px 12px;font-size:.95rem}
+.kv dt{color:var(--muted);font-weight:600}
+.kv dd{margin:0;min-width:0;overflow-wrap:anywhere;font-weight:600}
+.copy{border:0;background:var(--surface-2);border-radius:8px;padding:2px 8px;font-size:.75rem;font-weight:700;margin-left:6px;color:var(--muted)}
+
+/* gallery */
+.snap{border-radius:var(--r);overflow:hidden;position:relative}
+.snap img{display:block;width:100%;max-width:100%;aspect-ratio:720/506;object-fit:cover}
+.snap figcaption{position:absolute;left:10px;bottom:10px;background:color-mix(in srgb,var(--ink) 75%,transparent);color:var(--bg);font-size:.8rem;font-weight:700;padding:4px 10px;border-radius:99px}
+
+/* tab bar */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs button{border:0;background:none;padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.7rem;font-weight:700;color:var(--muted);position:relative}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-selected="true"]{color:var(--accent)}
+nav.tabs .dot{position:absolute;top:6px;right:calc(50% - 18px);width:9px;height:9px;border-radius:50%;background:var(--bad);border:2px solid var(--surface)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(10,6,14,.45);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:20px max(18px,env(safe-area-inset-left,0px)) calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;max-height:88vh;overflow-y:auto}
+.sheet .grab{width:44px;height:5px;border-radius:9px;background:var(--line);align-self:center}
+
+/* toast */
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:16px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100% - 32px);animation:drop .3s ease-out}
+@keyframes drop{from{transform:translate(-50%,-14px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}.meter i{transition:none}}
+@media (max-width:360px){.status,.actions{grid-template-columns:1fr}.tag h1{font-size:2.6rem}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <section class="view section" id="v-home">
+    <article class="tag">
+      <img src="images/hero.jpg" alt="Bunny, a white dog with a black head and a white stripe down her forehead, looking at the camera">
+      <span class="hole" aria-hidden="true"></span>
+      <div class="plate">
+        <span class="eyebrow" style="color:var(--pink)">Hi, I'm</span>
+        <h1>Bunny</h1>
+        <span class="aka">aka Orleans</span>
+        <p id="desc"></p>
+        <div class="facts" id="facts"></div>
+        <button class="edit-link" id="editProfileBtn" hidden>Edit Bunny's info</button>
+      </div>
+    </article>
+
+    <div id="connBanner" class="banner info" hidden></div>
+
+    <div class="stack" style="gap:8px">
+      <span class="eyebrow">Who's tapping?</span>
+      <div class="who" id="whoChips" role="group" aria-label="Pick your name"></div>
+    </div>
+
+    <div id="homeAlerts" class="stack" style="gap:8px"></div>
+
+    <div class="actions">
+      <button class="btn primary" data-open="feed">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18l-2 7a2 2 0 0 1-2 1.5H7A2 2 0 0 1 5 19z"/><path d="M8 12c0-3 1.5-5 4-5s4 2 4 5"/></svg>
+        I fed her
+      </button>
+      <button class="btn dark" data-open="walk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="2"/><path d="M5 7v5l3 3v6M5 12l-2 4M7 9c5 0 9 2 12 6"/><circle cx="19" cy="17" r="2"/></svg>
+        I walked her
+      </button>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="card stack" id="nextUpCard">
+      <div class="row" style="justify-content:space-between">
+        <h3>Who has Bunny next</h3>
+        <button class="edit-link" data-go="plans">All plans</button>
+      </div>
+      <div id="nextUp" class="muted">No trips planned yet.</div>
+    </div>
+
+    <div class="card stack">
+      <div class="row" style="justify-content:space-between">
+        <h3>Good to know</h3>
+        <button class="edit-link" id="editInfoBtn">Edit</button>
+      </div>
+      <dl class="kv" id="infoList"></dl>
+    </div>
+
+    <figure class="snap" style="margin:0">
+      <img src="images/couch.jpg" alt="Bunny lying on the grey couch next to a plush pumpkin and her toys">
+      <figcaption>Her spot on the couch</figcaption>
+    </figure>
+  </section>
+
+  <!-- MEALS -->
+  <section class="view section" id="v-meals" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2>Meals</h2>
+      <button class="btn primary small" data-open="feed">+ Log a meal</button>
+    </div>
+    <div class="card stack" id="mealToday"></div>
+    <div class="card stack">
+      <h3>Who fed her this week</h3>
+      <div class="board" id="mealBoard"></div>
+    </div>
+    <div class="stack" id="mealLog"></div>
+  </section>
+
+  <!-- WALKS -->
+  <section class="view section" id="v-walks" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2>Walks</h2>
+      <button class="btn dark small" data-open="walk">+ Log a walk</button>
+    </div>
+    <div class="status" id="walkStats"></div>
+    <div class="card stack">
+      <h3>Who walked her this week</h3>
+      <div class="board" id="walkBoard"></div>
+    </div>
+    <div class="stack" id="walkLog"></div>
+  </section>
+
+  <!-- PLANS -->
+  <section class="view section" id="v-plans" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2>Holidays &amp; breaks</h2>
+      <button class="btn primary small" data-open="book">+ Reserve</button>
+    </div>
+    <p class="muted" style="margin:0">Claim the dates you'll take Bunny home or watch her. Overlapping claims get flagged so you can sort it out.</p>
+    <div class="stack" style="gap:6px"><span class="eyebrow">Coming up</span><div class="entries" id="planUpcoming"></div></div>
+    <details class="stack" id="planPastWrap">
+      <summary class="eyebrow" style="cursor:pointer;padding:4px">Past</summary>
+      <div class="entries" id="planPast" style="margin-top:8px"></div>
+    </details>
+  </section>
+
+  <!-- SUPPLIES -->
+  <section class="view section" id="v-shop" hidden>
+    <h2>Supplies</h2>
+    <div class="card stack" id="foodCard"></div>
+    <div class="card stack">
+      <h3>Shopping list</h3>
+      <form class="row" id="addItemForm" style="flex-wrap:nowrap">
+        <input class="input" id="newItem" placeholder="Add something she needs" autocomplete="off" maxlength="80">
+        <button class="btn primary small" type="submit">Add</button>
+      </form>
+      <div class="sugg" id="sugg"></div>
+    </div>
+    <div class="entries" id="shopList"></div>
+    <button class="btn ghost small" id="clearDone" hidden style="align-self:flex-start">Clear bought items</button>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="in" role="tablist">
+    <button role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 3h-8z"/><rect x="5" y="6" width="14" height="15" rx="7"/><circle cx="12" cy="13" r="2.5"/></svg>Bunny</button>
+    <button role="tab" data-tab="meals" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18l-2 7a2 2 0 0 1-2 1.5H7A2 2 0 0 1 5 19z"/><path d="M8 12c0-3 1.5-5 4-5s4 2 4 5"/></svg>Meals</button>
+    <button role="tab" data-tab="walks" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="16" rx="4.5" ry="3.8"/><circle cx="6" cy="10" r="1.8"/><circle cx="9.5" cy="6.5" r="1.8"/><circle cx="14.5" cy="6.5" r="1.8"/><circle cx="18" cy="10" r="1.8"/></svg>Walks</button>
+    <button role="tab" data-tab="plans" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plans</button>
+    <button role="tab" data-tab="shop" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Supplies<span class="dot" id="shopDot" hidden></span></button>
+  </div>
+</nav>
+
+<div id="sheetRoot"></div>
+<div id="toastRoot" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+const PEOPLE=["Kylie","Taryn","KJ","Kayla","Vanessa","Alessia"];
+const DEFAULT_PROFILE={
+  description:"Bunny, who also goes by Orleans, is the friendliest girl you'll ever meet. She's originally from Texas, moved to Toronto, and now lives with us. Her favourite hobby is stealing people's slippers and socks, so guard your feet. She's a bit of a scaredy-cat: most of the time she's afraid to go outside, cars scare her, and she has had beef with a skunk before.",
+  facts:"Super friendly, Texas → Toronto, Sock & slipper thief, Scared of cars, Has beef with a skunk",
+  food:"", cupsPerMeal:1, mealsPerDay:2, mealTimes:"Morning & evening",
+  vet:"", vetPhone:"", meds:"", microchip:"", notes:"She gets nervous outside and is scared of cars, so be patient, give her time, and keep her away from busy roads. Watch out for skunks."
+};
+const DEFAULT_FOOD={cupsLeft:0,bagCups:0};
+const SUGGEST=["Dog food","Treats","Poop bags","Chews","Flea & tick meds","Heartworm pill","Shampoo","New toy"];
+
+const S={profile:{...DEFAULT_PROFILE},food:{...DEFAULT_FOOD},feedings:[],walks:[],bookings:[],shopping:[],db:null,canWrite:true,loaded:{}};
+let me=null; try{me=localStorage.getItem("bunny.me")}catch(e){}
+if(!PEOPLE.includes(me))me=null;
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DAY=864e5;
+const startOfDay=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
+const fmtTime=t=>new Date(t).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+const fmtDay=t=>{const s=startOfDay(t),today=startOfDay(Date.now());if(s===today)return"Today";if(s===today-DAY)return"Yesterday";return new Date(t).toLocaleDateString([], {weekday:"short",month:"short",day:"numeric"})};
+function ago(t){const m=Math.round((Date.now()-t)/6e4);if(m<1)return"just now";if(m<60)return m+" min ago";const h=Math.floor(m/60);if(h<24)return h+"h "+(m%60?(m%60)+"m ":"")+"ago";const d=Math.floor(h/24);return d+(d===1?" day ago":" days ago")}
+const parseDate=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).getTime()};
+const isoDate=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const toLocalInput=t=>{const d=new Date(t);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+
+function toast(msg){const r=$("#toastRoot");r.innerHTML="";const d=document.createElement("div");d.className="toast";d.textContent=msg;r.appendChild(d);clearTimeout(toast.t);toast.t=setTimeout(()=>d.remove(),3800)}
+
+/* ---------- tabs ---------- */
+const TABS=["home","meals","walks","plans","shop"];
+function go(tab){
+  if(!TABS.includes(tab))tab="home";
+  TABS.forEach(t=>{$("#v-"+t).hidden=t!==tab;document.querySelector(`[data-tab="${t}"]`).setAttribute("aria-selected",t===tab)});
+  try{localStorage.setItem("bunny.tab",tab)}catch(e){}
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>go(b.dataset.tab));
+document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g)go(g.dataset.go);const o=e.target.closest("[data-open]");if(o)openSheet(o.dataset.open)});
+
+/* ---------- who ---------- */
+function renderWho(){
+  $("#whoChips").innerHTML=PEOPLE.map(p=>`<button class="chip" aria-pressed="${p===me}" data-who="${p}">${p}</button>`).join("");
+  $("#whoChips").querySelectorAll("button").forEach(b=>b.onclick=()=>{me=b.dataset.who;try{localStorage.setItem("bunny.me",me)}catch(e){}renderWho()});
+}
+
+/* ---------- derived ---------- */
+function mealsToday(){const s=startOfDay(Date.now());return S.feedings.filter(f=>f.at>=s)}
+function foodDaysLeft(){const perDay=(+S.profile.cupsPerMeal||1)*(+S.profile.mealsPerDay||2);if(!S.food.bagCups)return null;return Math.max(0,S.food.cupsLeft)/perDay}
+function weekCounts(list){const since=Date.now()-7*DAY;const c=Object.fromEntries(PEOPLE.map(p=>[p,0]));list.forEach(x=>{if(x.at>=since&&c[x.who]!=null)c[x.who]++});return c}
+function lastWhere(list,fn){return list.find(fn)}
+function overlaps(b){return S.bookings.filter(o=>o.id!==b.id&&o.start<=b.end&&b.start<=o.end)}
+
+/* ---------- render ---------- */
+function renderProfile(){
+  $("#desc").textContent=S.profile.description||DEFAULT_PROFILE.description;
+  const facts=(S.profile.facts||"").split(",").map(s=>s.trim()).filter(Boolean);
+  $("#facts").innerHTML=facts.map(f=>`<span>${esc(f)}</span>`).join("");
+  const P=S.profile;
+  const rows=[
+    ["Food",P.food||"Not set yet"],
+    ["Portion",`${P.cupsPerMeal||1} cup${(+P.cupsPerMeal||1)===1?"":"s"} × ${P.mealsPerDay||2} meals/day`],
+    ["Meal times",P.mealTimes||"—"],
+    ["Vet",P.vet||"Not set yet"],
+    ["Vet phone",P.vetPhone?`<span class="num">${esc(P.vetPhone)}</span><button class="copy" data-copy="${esc(P.vetPhone)}">Copy</button>`:"—",true],
+    ["Meds / allergies",P.meds||"None listed"],
+    ["Microchip #",P.microchip||"—"],
+    ["Notes",P.notes||"—"]
+  ];
+  $("#infoList").innerHTML=rows.map(([k,v,raw])=>`<dt>${k}</dt><dd>${raw?v:esc(v)}</dd>`).join("");
+  $("#infoList").querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent="Copied"}catch(e){const r=document.createRange();r.selectNodeContents(b.previousElementSibling);const s=getSelection();s.removeAllRanges();s.addRange(r)}});
+}
+
+function renderHome(){
+  const lastFed=S.feedings[0], lastWalk=S.walks[0];
+  const lastPoop=lastWhere(S.walks,w=>w.poop), lastPee=lastWhere(S.walks,w=>w.pee);
+  const today=mealsToday(), need=+S.profile.mealsPerDay||2;
+  const fedPill=today.length>=need?`<span class="pill good">${today.length}/${need} meals today</span>`:today.length?`<span class="pill warn">${today.length}/${need} meals today</span>`:`<span class="pill bad">Not fed today</span>`;
+  const hrsWalk=lastWalk?(Date.now()-lastWalk.at)/36e5:99;
+  const walkPill=hrsWalk<4?`<span class="pill good">Recently out</span>`:hrsWalk<8?`<span class="pill warn">Out ${Math.floor(hrsWalk)}h ago</span>`:`<span class="pill bad">Needs to go out</span>`;
+  const days=foodDaysLeft();
+  let foodHtml;
+  if(days==null)foodHtml=`<span class="big">Not tracked</span><span class="sub"><button class="edit-link" data-go="shop">Set up the food bag</button></span>`;
+  else{const pct=Math.min(100,Math.round(S.food.cupsLeft/S.food.bagCups*100));const cls=days<=0?"out":days<=5?"low":"";
+    foodHtml=`<div class="row" style="justify-content:space-between"><span class="big num">~${Math.floor(days)} day${Math.floor(days)===1?"":"s"} left</span>${days<=0?'<span class="pill bad">Out</span>':days<=5?'<span class="pill warn">Running low</span>':'<span class="pill good">Stocked</span>'}</div><div class="meter ${cls}"><i style="width:${pct}%"></i></div><span class="sub num">${(+S.food.cupsLeft).toFixed(1).replace(/\.0$/,"")} of ${S.food.bagCups} cups in the bag</span>`}
+  $("#status").innerHTML=`
+    <div class="stat"><span class="eyebrow">Last meal</span>${fedPill}<span class="big">${lastFed?ago(lastFed.at):"No meals yet"}</span><span class="sub">${lastFed?`${esc(lastFed.who)} · ${fmtTime(lastFed.at)}`:"Tap “I fed her” to log one"}</span></div>
+    <div class="stat"><span class="eyebrow">Last walk</span>${walkPill}<span class="big">${lastWalk?ago(lastWalk.at):"No walks yet"}</span><span class="sub">${lastWalk?`${esc(lastWalk.who)} · ${[lastWalk.pee&&"pee",lastWalk.poop&&"poop"].filter(Boolean).join(" + ")||"nothing"}`:"Tap “I walked her” to log one"}</span></div>
+    <div class="stat"><span class="eyebrow">Last pee</span><span class="big">${lastPee?ago(lastPee.at):"—"}</span></div>
+    <div class="stat"><span class="eyebrow">Last poop</span><span class="big">${lastPoop?ago(lastPoop.at):"—"}</span></div>
+    <div class="stat wide"><span class="eyebrow">Food supply</span>${foodHtml}</div>`;
+
+  // alerts
+  const alerts=[];
+  if(days!=null&&days<=5){const onList=S.shopping.some(i=>!i.done&&/food/i.test(i.item));
+    alerts.push(`<div class="banner ${days<=0?"bad":"warn"}"><span>${days<=0?"Bunny's food bag is empty.":"Bunny's food is running low."}</span>${onList?'<span class="pill plain">On the list</span>':'<button class="btn small dark" id="addFoodBtn">Add to list</button>'}</div>`)}
+  const open=S.shopping.filter(i=>!i.done).length;
+  if(open)alerts.push(`<div class="banner info"><span>${open} thing${open===1?"":"s"} on the shopping list</span><button class="edit-link" data-go="shop">See list</button></div>`);
+  $("#homeAlerts").innerHTML=alerts.join("");
+  const afb=$("#addFoodBtn");if(afb)afb.onclick=()=>addItem("Dog food");
+  $("#shopDot").hidden=!(open||(days!=null&&days<=5));
+
+  // next up
+  const now=startOfDay(Date.now());
+  const up=S.bookings.filter(b=>parseDate(b.end)>=now).sort((a,b)=>a.start<b.start?-1:1).slice(0,2);
+  $("#nextUp").innerHTML=up.length?up.map(b=>{const live=parseDate(b.start)<=now;return `<div class="row" style="justify-content:space-between"><span><b>${esc(b.who)}</b> · ${esc(b.label)}</span><span class="pill ${live?"good":"plain"}">${live?"Has her now":rangeText(b)}</span></div>`}).join(""):"No trips planned yet.";
+}
+
+function board(el,counts){
+  const max=Math.max(1,...Object.values(counts));
+  el.innerHTML=PEOPLE.map(p=>`<div class="r"><span>${p}</span><span class="bar"><i style="width:${counts[p]/max*100}%"></i></span><span class="num" style="text-align:right">${counts[p]}</span></div>`).join("");
+}
+function delBtn(kind,id){return `<button class="x" data-del="${kind}:${id}" aria-label="Delete entry">Delete</button>`}
+function grouped(list,rowFn,emptyText){
+  if(!list.length)return `<div class="entries"><div class="empty">${emptyText}</div></div>`;
+  const groups=[];let cur=null;
+  list.forEach(x=>{const k=startOfDay(x.at);if(!cur||cur.k!==k){cur={k,items:[]};groups.push(cur)}cur.items.push(x)});
+  return groups.map(g=>`<div class="day"><div class="day-h"><span class="eyebrow">${fmtDay(g.k)}</span><span class="muted num" style="font-size:.8rem">${g.items.length}</span></div><div class="entries">${g.items.map(rowFn).join("")}</div></div>`).join("");
+}
+function renderMeals(){
+  const today=mealsToday(), need=+S.profile.mealsPerDay||2;
+  const slots=Array.from({length:need},(_,i)=>today.slice().reverse()[i]);
+  const names=need===2?["Breakfast","Dinner"]:Array.from({length:need},(_,i)=>"Meal "+(i+1));
+  $("#mealToday").innerHTML=`<div class="row" style="justify-content:space-between"><h3>Today</h3><span class="muted">${esc(S.profile.mealTimes||"")}</span></div>`+
+    slots.map((f,i)=>`<div class="row" style="justify-content:space-between"><span style="font-weight:700">${names[i]}</span>${f?`<span class="pill good">Fed ${fmtTime(f.at)} by ${esc(f.who)}</span>`:`<span class="pill plain">Not yet</span>`}</div>`).join("")+
+    (today.length>need?`<span class="pill warn" style="align-self:flex-start">Logged ${today.length} meals today. Double-fed?</span>`:"");
+  board($("#mealBoard"),weekCounts(S.feedings));
+  $("#mealLog").innerHTML=grouped(S.feedings,f=>`<div class="entry"><span class="t">${fmtTime(f.at)}</span><span class="w"><b>${esc(f.who)}</b> <span class="muted">· ${f.cups} cup${f.cups==1?"":"s"}</span>${f.note?`<small>${esc(f.note)}</small>`:""}</span>${delBtn("feedings",f.id)}</div>`,"No meals logged yet. When someone feeds Bunny, it shows up here with the time and who did it.");
+}
+function renderWalks(){
+  const since=startOfDay(Date.now());const tw=S.walks.filter(w=>w.at>=since);
+  $("#walkStats").innerHTML=`<div class="stat"><span class="eyebrow">Walks today</span><span class="big num">${tw.length}</span></div><div class="stat"><span class="eyebrow">Today</span><span class="big num">${tw.filter(w=>w.pee).length} pee · ${tw.filter(w=>w.poop).length} poop</span></div>`;
+  board($("#walkBoard"),weekCounts(S.walks));
+  $("#walkLog").innerHTML=grouped(S.walks,w=>`<div class="entry"><span class="t">${fmtTime(w.at)}</span><span class="w"><b>${esc(w.who)}</b>${w.mins?` <span class="muted">· ${w.mins} min</span>`:""}<span class="badges">${w.pee?'<span class="pill good">Peed</span>':'<span class="pill plain">No pee</span>'}${w.poop?'<span class="pill good">Pooped</span>':'<span class="pill plain">No poop</span>'}</span>${w.note?`<small>${esc(w.note)}</small>`:""}</span>${delBtn("walks",w.id)}</div>`,"No walks logged yet. Log each trip outside with pee/poop so everyone knows when she last went.");
+}
+function rangeText(b){const o={month:"short",day:"numeric"};const s=new Date(parseDate(b.start)),e=new Date(parseDate(b.end));return b.start===b.end?s.toLocaleDateString([],o):s.toLocaleDateString([],o)+" – "+e.toLocaleDateString([],o)}
+function renderPlans(){
+  const now=startOfDay(Date.now());
+  const sorted=S.bookings.slice().sort((a,b)=>a.start<b.start?-1:1);
+  const up=sorted.filter(b=>parseDate(b.end)>=now), past=sorted.filter(b=>parseDate(b.end)<now).reverse();
+  const row=b=>{const s=new Date(parseDate(b.start));const ov=overlaps(b).filter(o=>o.who!==b.who);const live=parseDate(b.start)<=now&&parseDate(b.end)>=now;
+    const nights=Math.round((parseDate(b.end)-parseDate(b.start))/DAY)+1;
+    return `<div class="booking"><div class="cal"><div class="m">${s.toLocaleDateString([],{month:"short"})}</div><div class="d">${s.getDate()}</div></div><div class="w"><b>${esc(b.label)}</b><div class="muted num">${rangeText(b)} · ${nights} day${nights===1?"":"s"}</div><div class="badges"><span class="pill plain">${esc(b.who)}</span>${live?'<span class="pill good">Happening now</span>':""}${ov.length?`<span class="pill bad">Overlaps ${esc(ov.map(o=>o.who).join(", "))}</span>`:""}</div>${b.note?`<small class="muted">${esc(b.note)}</small>`:""}</div>${delBtn("bookings",b.id)}</div>`};
+  $("#planUpcoming").innerHTML=up.length?up.map(row).join(""):`<div class="empty">Nobody has claimed Bunny yet. Tap “Reserve” to grab Thanksgiving, winter break, summer or a weekend.</div>`;
+  $("#planPast").innerHTML=past.length?past.map(row).join(""):`<div class="empty">Nothing yet.</div>`;
+}
+function renderShop(){
+  const days=foodDaysLeft();
+  const F=S.food;
+  $("#foodCard").innerHTML=`<div class="row" style="justify-content:space-between"><h3>Food bag</h3>${days==null?'<span class="pill plain">Not set up</span>':days<=0?'<span class="pill bad">Empty</span>':days<=5?'<span class="pill warn">Low</span>':'<span class="pill good">Stocked</span>'}</div>`+
+    (days==null?`<p class="muted" style="margin:0">Enter how many cups a full bag holds. Every logged meal takes its portion off the bag, so the page can warn you before she runs out.</p>`:
+    `<div class="meter ${days<=0?"out":days<=5?"low":""}"><i style="width:${Math.min(100,F.cupsLeft/F.bagCups*100)}%"></i></div><div class="row" style="justify-content:space-between"><span class="num"><b>${(+F.cupsLeft).toFixed(1).replace(/\.0$/,"")}</b> of ${F.bagCups} cups</span><span class="muted num">about ${Math.floor(days)} days</span></div>${F.updatedBy?`<small class="muted">Bag last refilled or adjusted by ${esc(F.updatedBy)}${F.updatedAt?" · "+fmtDay(F.updatedAt):""}</small>`:""}`)+
+    `<div class="grid2"><div class="field"><label for="bagCups">Cups in a full bag</label><input class="input num" id="bagCups" type="number" min="1" step="1" inputmode="numeric" value="${F.bagCups||""}" placeholder="e.g. 60"></div><div class="field"><label for="cupsLeft">Cups left now</label><input class="input num" id="cupsLeft" type="number" min="0" step="0.5" inputmode="decimal" value="${F.bagCups?(+F.cupsLeft).toFixed(1).replace(/\.0$/,""):""}" placeholder="e.g. 40"></div></div>
+    <div class="row"><button class="btn small primary" id="newBag">Opened a new bag</button><button class="btn small ghost" id="saveFood">Save amounts</button></div>`;
+  $("#newBag").onclick=async()=>{const bag=+$("#bagCups").value||F.bagCups;if(!bag){toast("Enter how many cups a full bag holds first");return}await saveFood({bagCups:bag,cupsLeft:bag});toast("New bag logged");const fi=S.shopping.find(i=>!i.done&&/food/i.test(i.item));if(fi)toggleItem(fi,true)};
+  $("#saveFood").onclick=async()=>{const bag=+$("#bagCups").value,left=$("#cupsLeft").value===""?bag:+$("#cupsLeft").value;if(!bag){toast("Enter how many cups a full bag holds");return}await saveFood({bagCups:bag,cupsLeft:Math.min(left,bag)});toast("Food amounts saved")};
+
+  const open=S.shopping.filter(i=>!i.done).sort((a,b)=>b.at-a.at), done=S.shopping.filter(i=>i.done).sort((a,b)=>b.at-a.at);
+  const all=open.concat(done);
+  $("#shopList").innerHTML=all.length?all.map(i=>`<div class="item ${i.done?"done":""}"><input type="checkbox" id="it-${i.id}" data-item="${i.id}" ${i.done?"checked":""} aria-label="Bought ${esc(i.item)}"><label class="w" for="it-${i.id}"><b>${esc(i.item)}</b><small class="muted" style="display:block">${i.done?`Bought by ${esc(i.boughtBy||"someone")}`:`Added by ${esc(i.by)} · ${fmtDay(i.at)}`}</small></label>${delBtn("shopping",i.id)}</div>`).join(""):`<div class="empty">Nothing needed right now. Add things as they run out.</div>`;
+  $("#shopList").querySelectorAll("[data-item]").forEach(c=>c.onchange=()=>{const it=S.shopping.find(i=>i.id===c.dataset.item);if(it)toggleItem(it,c.checked)});
+  $("#clearDone").hidden=!done.length;
+  const have=new Set(open.map(i=>i.item.toLowerCase()));
+  $("#sugg").innerHTML=SUGGEST.filter(s=>!have.has(s.toLowerCase())).map(s=>`<button type="button" data-sugg="${esc(s)}">+ ${esc(s)}</button>`).join("");
+  $("#sugg").querySelectorAll("[data-sugg]").forEach(b=>b.onclick=()=>addItem(b.dataset.sugg));
+}
+function renderAll(){renderProfile();renderHome();renderMeals();renderWalks();renderPlans();renderShop();
+  $("#editProfileBtn").hidden=!S.db||!S.canWrite;$("#editInfoBtn").hidden=!S.db||!S.canWrite;
+  document.querySelectorAll("[data-open]").forEach(b=>b.disabled=!S.db||!S.canWrite);
+  document.querySelectorAll("#addItemForm button,#addItemForm input").forEach(b=>b.disabled=!S.db||!S.canWrite);
+}
+
+/* ---------- delete (tap twice) ---------- */
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-del]");if(!b)return;
+  if(!b.classList.contains("armed")){document.querySelectorAll(".x.armed").forEach(x=>{x.classList.remove("armed");x.textContent="Delete"});b.classList.add("armed");b.textContent="Tap to confirm";setTimeout(()=>{if(b.isConnected){b.classList.remove("armed");b.textContent="Delete"}},3500);return}
+  const [col,id]=b.dataset.del.split(":");
+  try{
+    if(col==="feedings"){const f=S.feedings.find(x=>x.id===id);if(f&&S.food.bagCups)await saveFood({cupsLeft:Math.min(S.food.bagCups,(+S.food.cupsLeft)+(+f.cups||0))},true)}
+    await S.db.collection(col).doc(id).delete();toast("Deleted");
+  }catch(err){fail(err)}
+});
+
+/* ---------- writes ---------- */
+function fail(err){if(err&&err.code==="invalid_argument"){S.canWrite=false;renderAll();toast("You can view Bunny's page but not log to it. Open the link from Bunny's tag to get access.")}else toast("Couldn't save. Check your connection and try again.")}
+async function saveFood(patch,quiet){
+  const next={...S.food,...patch};if(!quiet){next.updatedBy=me||"Someone";next.updatedAt=Date.now()}
+  S.food=next;renderAll();
+  try{await S.db.doc("meta/food").set(next)}catch(err){fail(err)}
+}
+async function addItem(name){
+  name=(name||"").trim();if(!name||!S.db)return;
+  if(S.shopping.some(i=>!i.done&&i.item.toLowerCase()===name.toLowerCase())){toast(name+" is already on the list");return}
+  try{await S.db.collection("shopping").add({item:name,by:me||"Someone",done:false,at:Date.now()});toast("Added "+name)}catch(err){fail(err)}
+}
+async function toggleItem(it,done){try{await S.db.collection("shopping").doc(it.id).set({...it,id:undefined,done,boughtBy:done?(me||"Someone"):null,at:it.at})}catch(err){fail(err)}}
+$("#addItemForm").onsubmit=e=>{e.preventDefault();addItem($("#newItem").value);$("#newItem").value=""};
+$("#clearDone").onclick=async()=>{for(const i of S.shopping.filter(i=>i.done)){try{await S.db.collection("shopping").doc(i.id).delete()}catch(err){fail(err);break}}};
+
+/* ---------- sheets ---------- */
+function closeSheet(){$("#sheetRoot").innerHTML=""}
+function whoSelect(id){return `<div class="field"><label for="${id}">Who</label><select class="input" id="${id}">${PEOPLE.map(p=>`<option ${p===me?"selected":""}>${p}</option>`).join("")}</select></div>`}
+function openSheet(kind){
+  if(!S.db){toast("Tap Bunny's NFC tag to open the logging link");return}
+  let html="";
+  if(kind==="feed")html=`<h2>Log a meal</h2><div class="grid2">${whoSelect("fWho")}<div class="field"><label for="fCups">Cups</label><input class="input num" id="fCups" type="number" min="0" step="0.25" inputmode="decimal" value="${S.profile.cupsPerMeal||1}"></div></div><div class="field"><label for="fAt">When</label><input class="input" id="fAt" type="datetime-local" value="${toLocalInput(Date.now())}"></div><div class="field"><label for="fNote">Note (optional)</label><input class="input" id="fNote" maxlength="140" placeholder="e.g. Added a little wet food"></div>${mealsToday().length>=(+S.profile.mealsPerDay||2)?`<div class="banner warn">She already has ${mealsToday().length} meal${mealsToday().length===1?"":"s"} logged today. Last by ${esc(S.feedings[0].who)} at ${fmtTime(S.feedings[0].at)}.</div>`:""}<button class="btn primary" id="sSave">Save meal</button>`;
+  if(kind==="walk")html=`<h2>Log a walk</h2><div class="toggle"><button type="button" id="tPee" aria-pressed="true"><span>Peed</span><small>tap to toggle</small></button><button type="button" id="tPoop" aria-pressed="false"><span>Pooped</span><small>tap to toggle</small></button></div><div class="grid2">${whoSelect("wWho")}<div class="field"><label for="wMins">Minutes (optional)</label><input class="input num" id="wMins" type="number" min="0" step="5" inputmode="numeric" placeholder="15"></div></div><div class="field"><label for="wAt">When</label><input class="input" id="wAt" type="datetime-local" value="${toLocalInput(Date.now())}"></div><div class="field"><label for="wNote">Note (optional)</label><input class="input" id="wNote" maxlength="140" placeholder="e.g. Soft poop, keep an eye on it"></div><button class="btn dark" id="sSave">Save walk</button>`;
+  if(kind==="book"){const t=Date.now();html=`<h2>Reserve Bunny</h2><div class="field"><label for="bLabel">What for</label><select class="input" id="bLabel">${["Thanksgiving","Winter break","Spring break","Summer","Long weekend","Weekend","Other"].map(x=>`<option>${x}</option>`).join("")}</select></div>${whoSelect("bWho")}<div class="grid2"><div class="field"><label for="bStart">From</label><input class="input" id="bStart" type="date" value="${isoDate(t)}"></div><div class="field"><label for="bEnd">To</label><input class="input" id="bEnd" type="date" value="${isoDate(t+2*DAY)}"></div></div><div class="field"><label for="bNote">Note (optional)</label><input class="input" id="bNote" maxlength="160" placeholder="e.g. Taking her to my parents' in Jersey"></div><div id="bWarn"></div><button class="btn primary" id="sSave">Reserve these dates</button>`}
+  if(kind==="profile"||kind==="info"){const P=S.profile;html=kind==="profile"?`<h2>Bunny's intro</h2><div class="field"><label for="pDesc">Short description</label><textarea class="input" id="pDesc" rows="4" maxlength="400">${esc(P.description)}</textarea></div><div class="field"><label for="pFacts">Tags (comma separated)</label><input class="input" id="pFacts" maxlength="160" value="${esc(P.facts)}"></div><button class="btn primary" id="sSave">Save</button>`:
+    `<h2>Good to know</h2><div class="field"><label for="iFood">Food brand</label><input class="input" id="iFood" maxlength="80" value="${esc(P.food)}" placeholder="e.g. Purina Pro Plan Large Breed"></div><div class="grid2"><div class="field"><label for="iCups">Cups per meal</label><input class="input num" id="iCups" type="number" min="0.25" step="0.25" inputmode="decimal" value="${P.cupsPerMeal}"></div><div class="field"><label for="iMeals">Meals per day</label><input class="input num" id="iMeals" type="number" min="1" max="4" step="1" inputmode="numeric" value="${P.mealsPerDay}"></div></div><div class="field"><label for="iTimes">Meal times</label><input class="input" id="iTimes" maxlength="60" value="${esc(P.mealTimes)}"></div><div class="grid2"><div class="field"><label for="iVet">Vet</label><input class="input" id="iVet" maxlength="80" value="${esc(P.vet)}"></div><div class="field"><label for="iVetPhone">Vet phone</label><input class="input" id="iVetPhone" type="tel" maxlength="30" value="${esc(P.vetPhone)}"></div></div><div class="field"><label for="iMeds">Meds / allergies</label><input class="input" id="iMeds" maxlength="140" value="${esc(P.meds)}"></div><div class="field"><label for="iChip">Microchip #</label><input class="input" id="iChip" maxlength="40" value="${esc(P.microchip)}"></div><div class="field"><label for="iNotes">Notes</label><textarea class="input" id="iNotes" rows="3" maxlength="400" placeholder="e.g. No grapes or chocolate. Pulls on the leash near squirrels.">${esc(P.notes)}</textarea></div><button class="btn primary" id="sSave">Save</button>`}
+  $("#sheetRoot").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true"><span class="grab"></span>${html}<button class="btn ghost small" id="sCancel">Cancel</button></div></div>`;
+  $("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};$("#sCancel").onclick=closeSheet;
+  document.querySelectorAll(".toggle button").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true"));
+  if(kind==="book"){const chk=()=>{const s=$("#bStart").value,e=$("#bEnd").value;const ov=s&&e?overlaps({id:"_",start:s,end:e}):[];$("#bWarn").innerHTML=ov.length?`<div class="banner warn">Heads up: ${esc(ov.map(o=>`${o.who} (${o.label}, ${rangeText(o)})`).join("; "))} overlaps these dates.</div>`:""};["bStart","bEnd"].forEach(i=>$("#"+i).onchange=chk);chk()}
+  $("#sSave").onclick=async()=>{
+    const btn=$("#sSave");btn.disabled=true;
+    try{
+      if(kind==="feed"){const who=$("#fWho").value,cups=Math.max(0,+$("#fCups").value||0),at=new Date($("#fAt").value).getTime()||Date.now();
+        setMe(who);await S.db.collection("feedings").add({who,cups,at,note:$("#fNote").value.trim()});
+        if(S.food.bagCups)await saveFood({cupsLeft:Math.max(0,(+S.food.cupsLeft)-cups)},true);
+        closeSheet();toast(`Logged: ${who} fed Bunny at ${fmtTime(at)}`)}
+      if(kind==="walk"){const who=$("#wWho").value,at=new Date($("#wAt").value).getTime()||Date.now();
+        setMe(who);await S.db.collection("walks").add({who,at,pee:$("#tPee").getAttribute("aria-pressed")==="true",poop:$("#tPoop").getAttribute("aria-pressed")==="true",mins:+$("#wMins").value||0,note:$("#wNote").value.trim()});
+        closeSheet();toast(`Logged: ${who} walked Bunny`)}
+      if(kind==="book"){let s=$("#bStart").value,e=$("#bEnd").value;if(!s||!e){toast("Pick both dates");btn.disabled=false;return}if(e<s)[s,e]=[e,s];
+        const who=$("#bWho").value;setMe(who);await S.db.collection("bookings").add({who,label:$("#bLabel").value,start:s,end:e,note:$("#bNote").value.trim(),at:Date.now()});closeSheet();toast(`${who} reserved Bunny`)}
+      if(kind==="profile"){await S.db.doc("meta/profile").set({...S.profile,description:$("#pDesc").value.trim(),facts:$("#pFacts").value});closeSheet();toast("Saved")}
+      if(kind==="info"){await S.db.doc("meta/profile").set({...S.profile,food:$("#iFood").value.trim(),cupsPerMeal:+$("#iCups").value||1,mealsPerDay:Math.min(4,Math.max(1,+$("#iMeals").value||2)),mealTimes:$("#iTimes").value.trim(),vet:$("#iVet").value.trim(),vetPhone:$("#iVetPhone").value.trim(),meds:$("#iMeds").value.trim(),microchip:$("#iChip").value.trim(),notes:$("#iNotes").value.trim()});closeSheet();toast("Saved")}
+    }catch(err){btn.disabled=false;fail(err)}
+  };
+}
+function setMe(who){if(PEOPLE.includes(who)&&who!==me){me=who;try{localStorage.setItem("bunny.me",me)}catch(e){}renderWho()}}
+$("#editProfileBtn").onclick=()=>openSheet("profile");
+$("#editInfoBtn").onclick=()=>openSheet("info");
+
+/* ---------- live data ---------- */
+const LABEL={feedings:f=>`${f.who} just fed Bunny`,walks:w=>`${w.who} took Bunny out${w.poop?" (she pooped)":w.pee?" (she peed)":""}`,bookings:b=>`${b.who} reserved Bunny for ${b.label}`,shopping:i=>`${i.by} added ${i.item} to the list`};
+function listen(col,q){
+  q.onSnapshot(snap=>{
+    if(S.loaded[col]&&!snap.metadata.hasPendingWrites){snap.docChanges().forEach(c=>{if(c.type==="added"&&LABEL[col]){const d=c.doc.data();if(d&&d.who!==me&&d.by!==me&&Date.now()-(d.at||0)<10*6e4)toast(LABEL[col](d))}})}
+    S[col]=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(!snap.metadata.fromCache)S.loaded[col]=true;
+    renderAll();
+  },err=>{console.warn(col,err)});
+}
+async function boot(){
+  renderWho();
+  let t=null;try{t=localStorage.getItem("bunny.tab")}catch(e){}
+  go(location.hash.slice(1)||t||"home");
+  renderAll();
+  const conn=$("#connBanner");
+  conn.hidden=false;conn.textContent="Loading Bunny's log…";
+  const cfg=window.BUNNY_FIREBASE_CONFIG;
+  if(!window.firebase||!cfg||!cfg.apiKey||cfg.apiKey.startsWith("PASTE")){conn.textContent="This page isn't connected to its database yet. Fill in config.js (see the README).";return}
+  // The house key comes from the link on Bunny's tag (?k=...) and is remembered on this phone.
+  let key=new URLSearchParams(location.search).get("k");
+  try{if(key)localStorage.setItem("bunny.key",key);else key=localStorage.getItem("bunny.key")}catch(e){}
+  if(!key){conn.textContent="Tap Bunny's NFC tag (or open the roommates' link) to see and log her meals, walks and plans.";return}
+  if(location.search)history.replaceState(null,"",location.pathname+location.hash);
+  firebase.initializeApp(cfg);
+  const home=firebase.firestore().collection("homes").doc(key);
+  const db={collection:c=>home.collection(c),doc:p=>{const [c,id]=p.split("/");return home.collection(c).doc(id)}};
+  S.db=db;conn.hidden=true;
+  db.doc("meta/profile").onSnapshot(s=>{S.profile={...DEFAULT_PROFILE,...(s.exists?s.data():{})};renderAll()},()=>{});
+  db.doc("meta/food").onSnapshot(s=>{S.food={...DEFAULT_FOOD,...(s.exists?s.data():{})};renderAll()},()=>{});
+  listen("feedings",db.collection("feedings").orderBy("at","desc").limit(150));
+  listen("walks",db.collection("walks").orderBy("at","desc").limit(150));
+  listen("bookings",db.collection("bookings").orderBy("start","asc").limit(100));
+  listen("shopping",db.collection("shopping").orderBy("at","desc").limit(100));
+  setInterval(()=>{if(!document.hidden)renderHome()},60000);
+}
+boot();
+})();
+</script>
+</body>
+</html>

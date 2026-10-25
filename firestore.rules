@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only someone who knows the house key (it's in the link on Bunny's NFC tag) can read or write.
+    // Replace YOUR-HOUSE-KEY with your key when you paste these rules into the Firebase console.
+    // Don't commit your real key to this repo.
+    match /homes/{key}/{document=**} {
+      allow read, write: if key == "YOUR-HOUSE-KEY";
+    }
+  }
+}
