@@ -1,0 +1,10 @@
+# Mac / Windows clutter
+.DS_Store
+Thumbs.db
+
+# Your copy of the rules with the real house key (never commit the key)
+firestore.local.rules
+
+# Editor folders
+.vscode/
+.idea/
